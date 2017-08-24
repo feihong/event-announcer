@@ -1,0 +1,11 @@
+defmodule Events.Repo.Migrations.AddReadItems do
+  use Ecto.Migration
+
+  def change do
+    create table(:read_items) do
+      add :source, :string
+      add :source_id, :string
+      add :start_time, :datetime
+    end
+  end
+end

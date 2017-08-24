@@ -9,6 +9,8 @@ System for event discovery and announcement
 ```
 cd events
 mix deps.get
+mix ecto.create
+mix ecto.migrate
 ```
 
 ## References
