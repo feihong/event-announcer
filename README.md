@@ -10,3 +10,7 @@ System for event discovery and announcement
 cd events
 mix deps.get
 ```
+
+## References
+
+[Ecto - Getting Started](https://hexdocs.pm/ecto/getting-started.html)
