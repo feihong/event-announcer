@@ -4,6 +4,7 @@ defmodule Events.ReadItem do
   schema "read_items" do
     field :source, :string
     field :source_id, :string
+    field :name, :string
     field :start_time, :utc_datetime
   end
 end

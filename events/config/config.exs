@@ -10,3 +10,27 @@ config :events, Events.Repo,
   hostname: "localhost"
 
 config :events, ecto_repos: [Events.Repo]
+
+config :events,
+  keywords: [
+    "china",
+    "chinese",
+    "taiwan",
+    "hong kong",
+    "mandarin",
+    "cantonese"
+  ]
+
+config :events, Facebook,
+  pages: [
+    "ChineseFineArts",
+    "ccamuseum",
+    "windmilldramaclub",
+    "ChicagoChinatownChamberofCommerce",
+    "siskelfilmcenter",
+    "musicboxchicago",
+    "sophiaschoicepresents",
+    "faaimous",
+    "chicagofilmfestival",
+    "ChicagoCulturalCenter"
+  ]
