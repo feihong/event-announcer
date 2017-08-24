@@ -34,3 +34,5 @@ config :events, Facebook,
     "chicagofilmfestival",
     "ChicagoCulturalCenter"
   ]
+
+  import_config "auth.exs"
