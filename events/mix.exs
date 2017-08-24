@@ -14,6 +14,7 @@ defmodule Events.Mixfile do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
+      applications: [:httpoison, :timex],
       extra_applications: [:logger],
       mod: {Events.Application, []}
     ]
@@ -23,7 +24,11 @@ defmodule Events.Mixfile do
   defp deps do
     [
       {:ecto, "~> 2.2.0"},
-      {:postgrex, "~> 0.13.3"}
+      {:postgrex, "~> 0.13.3"},
+      {:poison, "~> 3.1.0"},
+      {:httpoison, "~> 0.13"},
+      {:slime, "~> 1.0.0"},
+      {:timex, "~> 3.1.24"}
     ]
   end
 end
