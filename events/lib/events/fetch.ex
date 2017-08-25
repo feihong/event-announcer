@@ -14,34 +14,35 @@ defmodule Mix.Tasks.Events.Fetch do
       |> Enum.count(fn evt -> length(evt["matched_keywords"]) > 0 end)
 
     events |> Events.Util.to_json_file("report.json")
-    
+
     template = "templates/report.slime" |> File.read!
     Slime.render(template, events: events, match_count: match_count)
       |> (fn output -> File.write("report.html", output) end).()
 
-    IO.puts "Wrote events to report.html"
+    IO.puts "\nWrote events to report.html"
   end
 
   defp fetch_all() do
     page_names = Application.fetch_env!(:events, Facebook)[:pages]
+    max_concurrency = System.schedulers_online() * 2
 
     # Fetch all events and sort.
     page_names
-      |> Enum.map(fn name -> fetch(name) end)
-      |> List.flatten
+      |> Task.async_stream(fn name -> fetch(name) end,
+            ordered: false, max_concurrency: max_concurrency)
+      |> Enum.reduce([], fn({:ok, events}, acc) -> acc ++ events end)
       |> Enum.map(&enhance/1)
       |> Enum.sort_by(&sort_mapper/1)
   end
 
   defp fetch(name) do
-    alias Events.Download
-
+    # Returns a list of maps.
     cache_name = "facebook__#{name}"
     url = "https://graph.facebook.com/v2.9/#{name}/events/"
     params = %{access_token: @access_token,
                since: DateTime.utc_now |> DateTime.to_iso8601}
 
-    Download.fetch(cache_name, url, params)["data"]
+    Events.Download.fetch(cache_name, url, params)["data"]
   end
 
   defp enhance(evt) do
