@@ -9,8 +9,13 @@ defmodule Mix.Tasks.Events.Fetch do
     IO.inspect Application.ensure_all_started :httpoison
 
     events = fetch_all()
+    # Get the number of events that matched keywords.
     match_count = events
       |> Enum.count(fn evt -> length(evt["matched_keywords"]) > 0 end)
+
+    events
+      |> Poison.encode!(pretty: true)
+      |> (fn text -> File.write!("report.json", text) end).()
 
     template = "templates/report.slime" |> File.read!
     Slime.render(template, events: events, match_count: match_count)
