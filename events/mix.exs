@@ -14,7 +14,6 @@ defmodule Events.Mixfile do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      applications: [:httpoison, :timex],
       extra_applications: [:logger],
       mod: {Events.Application, []}
     ]

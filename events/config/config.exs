@@ -29,7 +29,7 @@ config :events, Facebook,
     "ChicagoChinatownChamberofCommerce",
     "siskelfilmcenter",
     "musicboxchicago",
-    "sophiaschoicepresents",
+    "asianpopupcinema",
     "faaimous",
     "chicagofilmfestival",
     "ChicagoCulturalCenter"

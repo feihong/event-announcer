@@ -20,3 +20,5 @@ erl_crash.dump
 *.ez
 
 config/auth.exs
+cache_pages/*.json
+report.html
