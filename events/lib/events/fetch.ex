@@ -13,10 +13,8 @@ defmodule Mix.Tasks.Events.Fetch do
     match_count = events
       |> Enum.count(fn evt -> length(evt["matched_keywords"]) > 0 end)
 
-    events
-      |> Poison.encode!(pretty: true)
-      |> (fn text -> File.write!("report.json", text) end).()
-
+    events |> Events.Util.to_json_file("report.json")
+    
     template = "templates/report.slime" |> File.read!
     Slime.render(template, events: events, match_count: match_count)
       |> (fn output -> File.write("report.html", output) end).()

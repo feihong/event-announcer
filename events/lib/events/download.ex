@@ -17,7 +17,7 @@ defmodule Events.Download do
         |> (fn response -> response.body end).()
         |> Poison.decode!
 
-      write_to_file(path, data)
+      data |> Events.Util.to_json_file(path)
       data
     end
   end
@@ -32,11 +32,5 @@ defmodule Events.Download do
   # Get the ctime of the given file as a DateTime
   defp file_ctime_datetime(path) do
     File.stat!(path, time: :posix).ctime |> DateTime.from_unix!
-  end
-
-  defp write_to_file(path, data) do
-    data
-      |> Poison.encode!(pretty: true)
-      |> (fn text -> File.write(path, text) end).()
   end
 end
