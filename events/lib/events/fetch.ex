@@ -6,7 +6,7 @@ defmodule Mix.Tasks.Events.Fetch do
   @access_token Application.fetch_env!(:events, Facebook)[:access_token]
 
   def run(_args) do
-    IO.inspect Application.ensure_all_started :httpoison
+    Application.ensure_all_started :httpoison
 
     events = fetch_all()
     # Get the number of events that matched keywords.
