@@ -4,4 +4,9 @@ defmodule Events.Util do
       |> Poison.encode!(pretty: true)
       |> (fn text -> File.write(path, text) end).()
   end
+
+  def from_json_file(path) do
+    File.read!(path)
+      |> Poison.decode!
+  end
 end
