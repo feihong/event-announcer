@@ -14,6 +14,11 @@ defmodule Mix.Tasks.Events.MarkRead do
   end
 
   defp add_read_item(evt) do
-    IO.puts evt.name
+    IO.inspect %Events.ReadItem{
+      source: evt.source,
+      source_id: evt.source_id,
+      name: evt.name,
+      start_time: evt.start_time
+    }
   end
 end

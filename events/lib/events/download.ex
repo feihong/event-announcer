@@ -5,7 +5,7 @@ defmodule Events.Download do
   @hour 60 * 60
 
   def fetch(cache_name, url, params) do
-    path = "cache_pages/#{cache_name}.json"
+    path = "cache/#{cache_name}.json"
 
     if file_is_recent?(path) do
       Logger.info "Retrieving #{cache_name} from cache"

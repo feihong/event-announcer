@@ -49,7 +49,9 @@ defmodule Mix.Tasks.Events.Fetch do
   defp convert(evt_map) do
     start_time = Timex.parse!(evt_map["start_time"], "{ISO:Extended}")
 
-    evt = %Event{
+    evt = %Events.Event{
+      source: "facebook",
+      source_id: evt_map["id"],
       name: evt_map["name"],
       description: evt_map["description"],
       url: "https://facebook.com/events/#{evt_map["id"]}",

@@ -7,6 +7,6 @@ defmodule Events.Util do
 
   def from_json_file(path) do
     File.read!(path)
-      |> Poison.decode!(as: [%Event{}])
+      |> Poison.decode!(as: [%Events.Event{}])
   end
 end
