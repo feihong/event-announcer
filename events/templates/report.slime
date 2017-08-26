@@ -20,12 +20,11 @@ html
           tr
             td = num
             td
-              a href="#{evt["url"]}" target="_blank" = evt["name"]
-              = if length(evt["matched_keywords"]) > 0 do
-                div Matched: #{Enum.join(evt["matched_keywords"], ",")}
+              a href="#{evt.url}" target="_blank" = evt.name
+              = if length(evt.matched_keywords) > 0 do
+                div Matched: #{Enum.join(evt.matched_keywords, ",")}
               - else
                 span
-            - dt = evt["start_dt"]
-            td = Timex.format!(dt, "{WDshort}, {Mshort} {D}, {YYYY}")
-            td = Timex.format!(dt, "{h12}:{m} {am}")
-            td = evt["place"]["name"]
+            td = Timex.format!(evt.start_time, "{WDshort}, {Mshort} {D}, {YYYY}")
+            td = Timex.format!(evt.start_time, "{h12}:{m} {am}")
+            td = evt.venue

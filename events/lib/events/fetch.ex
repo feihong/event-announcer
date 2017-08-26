@@ -7,11 +7,12 @@ defmodule Mix.Tasks.Events.Fetch do
 
   def run(_args) do
     Application.ensure_all_started :httpoison
+    Application.ensure_all_started :timex
 
     events = fetch_all()
     # Get the number of events that matched keywords.
     match_count = events
-      |> Enum.count(fn evt -> length(evt["matched_keywords"]) > 0 end)
+      |> Enum.count(fn evt -> length(evt.matched_keywords) > 0 end)
 
     events |> Events.Util.to_json_file("report.json")
 
@@ -31,7 +32,7 @@ defmodule Mix.Tasks.Events.Fetch do
       |> Task.async_stream(fn name -> fetch(name) end,
             ordered: false, max_concurrency: max_concurrency)
       |> Enum.reduce([], fn({:ok, events}, acc) -> acc ++ events end)
-      |> Enum.map(&enhance/1)
+      |> Enum.map(&convert/1)
       |> Enum.sort_by(&sort_mapper/1)
   end
 
@@ -45,24 +46,31 @@ defmodule Mix.Tasks.Events.Fetch do
     Events.Download.fetch(cache_name, url, params)["data"]
   end
 
-  defp enhance(evt) do
-    text = evt["name"] <> "  " <> evt["description"] |> String.downcase
+  defp convert(evt_map) do
+    start_time = Timex.parse!(evt_map["start_time"], "{ISO:Extended}")
+
+    evt = %Event{
+      name: evt_map["name"],
+      description: evt_map["description"],
+      url: "https://facebook.com/events/#{evt_map["id"]}",
+      venue: evt_map["place"]["name"],
+      start_time: start_time,
+      timestamp: Timex.to_unix(start_time)
+    }
+
+    text = evt.name <> "  " <> evt.description |> String.downcase
     matched_keywords =
-      for keyword <- @keywords,
-          String.contains?(text, keyword) do
+      for keyword <- @keywords, String.contains?(text, keyword) do
         keyword
       end
 
-    evt
-      |> Map.put("url", "https://facebook.com/events/#{evt["id"]}")
-      |> Map.put("matched_keywords", matched_keywords)
-      |> Map.put("start_dt", Timex.parse!(evt["start_time"], "{ISO:Extended}"))
+    %{evt | matched_keywords: matched_keywords}
   end
 
   defp sort_mapper(evt) do
     # Make sure that events that match keywords are always in front
     # regardless of start time.
-    num = if length(evt["matched_keywords"]) > 0, do: 0, else: 1
-    {num, evt["start_time"]}
+    num = if length(evt.matched_keywords) > 0, do: 0, else: 1
+    {num, evt.timestamp}
   end
 end
