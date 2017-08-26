@@ -8,5 +8,7 @@ defmodule Events.Repo.Migrations.AddReadItems do
       add :name, :string
       add :start_time, :utc_datetime
     end
+
+    create index("read_items", [:source, :source_id], unique: true)
   end
 end
