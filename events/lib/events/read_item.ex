@@ -5,6 +5,6 @@ defmodule Events.ReadItem do
     field :source, :string
     field :source_id, :string
     field :name, :string
-    field :start_time, :utc_datetime
+    field :start_time, Timex.Ecto.DateTime
   end
 end
