@@ -25,7 +25,10 @@ defmodule Mix.Tasks.Events.Publish do
       description: evt.description,
       publish_status: "draft",
       time: evt.timestamp * 1000,
-      duration: evt.duration * 1000
+      duration: evt.duration * 1000,
+      event_hosts: "",
+      self_rsvp: "false",
+      how_to_find_us: "There is currently no host for this event"
     }
     res = HTTPoison.post!(url, [], [], params: params)
     if res.status_code == 201 do
