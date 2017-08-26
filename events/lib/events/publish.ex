@@ -6,10 +6,30 @@ defmodule Mix.Tasks.Events.Publish do
   @urlname Application.fetch_env!(:events, Meetup)[:urlname]
 
   def run(args) do
+    Application.ensure_all_started :httpoison
+
     indexes = args |> Enum.map(&String.to_integer/1)
 
-    for index <- indexes do
-      IO.puts index
+    Events.Util.from_json_file("events.json")
+      |> Enum.with_index(1)
+      |> Enum.filter(fn {_evt, index} -> index in indexes end)
+      |> Enum.map(fn {evt, _index} -> evt end)
+      |> Enum.map(&publish/1)
+  end
+
+  defp publish(evt) do
+    url = "https://api.meetup.com/#{@urlname}/events"
+    params = %{
+      key: @api_key,
+      name: evt.name,
+      description: evt.description,
+      publish_status: "draft",
+      time: evt.timestamp * 1000,
+      duration: evt.duration * 1000
+    }
+    res = HTTPoison.post!(url, [], [], params: params)
+    if res.status_code == 201 do
+      IO.puts "Posted #{evt.name} at #{evt.venue}"
     end
   end
 end
