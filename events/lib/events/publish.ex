@@ -22,7 +22,7 @@ defmodule Mix.Tasks.Events.Publish do
     params = %{
       key: @api_key,
       name: evt.name,
-      description: evt.description,
+      description: "#{evt.description}\n\nSource: #{evt.url}",
       publish_status: "draft",
       time: evt.timestamp * 1000,
       duration: evt.duration * 1000,
