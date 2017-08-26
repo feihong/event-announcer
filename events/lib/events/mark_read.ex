@@ -8,10 +8,11 @@ defmodule Mix.Tasks.Events.MarkRead do
     Mix.Ecto.ensure_started Events.Repo, []
 
     if File.exists?("events.json") do
-      Events.Util.from_json_file("events.json")
+      results = Events.Util.from_json_file("events.json")
         |> Enum.filter(fn evt -> length(evt.matched_keywords) == 0 end)
         |> Enum.map(&insert_read_item/1)
-        |> IO.inspect
+
+      IO.puts "Marked #{length(results)} events as read"
     else
       IO.puts "The events.json file was not found"
     end

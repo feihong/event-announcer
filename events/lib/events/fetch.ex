@@ -7,7 +7,8 @@ defmodule Mix.Tasks.Events.Fetch do
 
   def run(_args) do
     Application.ensure_all_started :httpoison
-    Application.ensure_all_started :timex
+    Application.ensure_all_started :timex_ecto
+    Mix.Ecto.ensure_started Events.Repo, []
 
     events = fetch_all()
     # Get the number of events that matched keywords.
@@ -20,7 +21,7 @@ defmodule Mix.Tasks.Events.Fetch do
     Slime.render(template, events: events, match_count: match_count)
       |> (fn output -> File.write("report.html", output) end).()
 
-    IO.puts "\nWrote events to report.html"
+    IO.puts "\nWrote #{length(events)} events to report.html"
   end
 
   defp fetch_all() do
@@ -32,6 +33,7 @@ defmodule Mix.Tasks.Events.Fetch do
       |> Task.async_stream(fn name -> fetch(name) end,
             ordered: false, max_concurrency: max_concurrency)
       |> Enum.reduce([], fn({:ok, events}, acc) -> acc ++ events end)
+      |> Enum.filter(&not_read/1)
       |> Enum.map(&convert/1)
       |> Enum.sort_by(&sort_mapper/1)
   end
@@ -44,6 +46,12 @@ defmodule Mix.Tasks.Events.Fetch do
                since: DateTime.utc_now |> DateTime.to_iso8601}
 
     Events.Download.fetch(cache_name, url, params)["data"]
+  end
+
+  defp not_read(evt_map) do
+    result = Events.ReadItem
+      |> Events.Repo.get_by(source: "facebook", source_id: evt_map["id"])
+    result == nil
   end
 
   defp convert(evt_map) do
