@@ -21,7 +21,7 @@ defmodule Mix.Tasks.Events.Fetch do
     Slime.render(template, events: events, match_count: match_count)
       |> (fn output -> File.write("report.html", output) end).()
 
-    IO.puts "\nWrote #{length(events)} events to report.html"
+    IO.puts "\nWrote #{length(events)} events to report.html and events.json"
   end
 
   defp fetch_all() do
@@ -56,6 +56,7 @@ defmodule Mix.Tasks.Events.Fetch do
 
   defp convert(evt_map) do
     start_time = Timex.parse!(evt_map["start_time"], "{ISO:Extended}")
+    end_time = Timex.parse!(evt_map["end_time"], "{ISO:Extended}")
 
     evt = %Events.Event{
       source: "facebook",
@@ -65,7 +66,8 @@ defmodule Mix.Tasks.Events.Fetch do
       url: "https://facebook.com/events/#{evt_map["id"]}",
       venue: evt_map["place"]["name"],
       start_time: start_time,
-      timestamp: Timex.to_unix(start_time)
+      timestamp: Timex.to_unix(start_time),
+      duration: Timex.diff(end_time, start_time, :seconds)
     }
 
     text = evt.name <> "  " <> evt.description |> String.downcase
