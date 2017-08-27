@@ -1,3 +1,6 @@
+require Logger
+
+
 defmodule Mix.Tasks.Events.Publish do
   use Mix.Task
 
@@ -39,6 +42,8 @@ defmodule Mix.Tasks.Events.Publish do
     res = HTTPoison.post!(url, [], [], params: params)
     if res.status_code == 201 do
       IO.puts "Posted #{evt.name} at #{evt.venue}"
+    else
+      Logger.error "Status code #{res.status_code}, response: #{res.body}"
     end
   end
 end
