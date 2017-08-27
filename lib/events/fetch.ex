@@ -8,7 +8,10 @@ defmodule Mix.Tasks.Events.Fetch do
     Application.ensure_all_started :timex_ecto
     Mix.Ecto.ensure_started Events.Repo, []
 
-    events = Events.Facebook.fetch_all()
+    events =
+      [Events.Facebook, Events.EventBrite]
+      |> Enum.map(fn mod -> apply(mod, :fetch_all, []) end)
+      |> List.flatten
       |> Enum.filter(&not_read/1)
       |> Enum.sort_by(&sort_mapper/1)
 

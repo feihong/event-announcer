@@ -18,7 +18,8 @@ config :events,
     "taiwan",
     "hong kong",
     "mandarin",
-    "cantonese"
+    "cantonese",
+    "chinatown"
   ]
 
 config :events, Facebook,
@@ -34,5 +35,8 @@ config :events, Facebook,
     "chicagofilmfestival",
     "ChicagoCulturalCenter"
   ]
+
+  config :events, EventBrite,
+    location: "Chicago, IL"
 
   import_config "auth.exs"
