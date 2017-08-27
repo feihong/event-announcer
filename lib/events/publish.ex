@@ -29,9 +29,13 @@ defmodule Mix.Tasks.Events.Publish do
       desc
     end
 
+    if String.length(evt.name) > 80 do
+      Logger.warn "Event \"#{evt.name}\" has a name longer than 80 characters"
+    end
+
     params = %{
       key: @api_key,
-      name: evt.name,
+      name: String.slice(evt.name, 0..79),
       description: full_desc,
       publish_status: "draft",
       time: evt.timestamp * 1000,
