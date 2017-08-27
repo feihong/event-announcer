@@ -3,16 +3,24 @@ defmodule Mix.Tasks.Events.MarkRead do
 
   @shortdoc "Mark events in the report as read"
 
-  def run(_args) do
+  def run(args) do
     Application.ensure_all_started :timex_ecto
     Mix.Ecto.ensure_started Events.Repo, []
 
     if File.exists?("events.json") do
       results = Events.Util.from_json_file("events.json")
-        |> Enum.filter(fn evt -> length(evt.matched_keywords) == 0 end)
-        |> Enum.map(&insert_read_item/1)
 
-      IO.puts "Marked #{length(results)} events as read"
+      events =
+        if args == ["all"] do
+          results
+        else
+          results
+            |> Enum.filter(fn evt -> length(evt.matched_keywords) == 0 end)
+        end
+
+      events |> Enum.map(&insert_read_item/1)
+
+      IO.puts "Marked #{length(events)} events as read"
     else
       IO.puts "The events.json file was not found"
     end
