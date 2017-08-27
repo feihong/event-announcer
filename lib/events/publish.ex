@@ -27,7 +27,7 @@ defmodule Mix.Tasks.Events.Publish do
       time: evt.timestamp * 1000,
       duration: evt.duration * 1000,
       event_hosts: "",
-      self_rsvp: "false"      
+      self_rsvp: "false"
     }
     res = HTTPoison.post!(url, [], [], params: params)
     if res.status_code == 201 do

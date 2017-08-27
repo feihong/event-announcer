@@ -42,6 +42,8 @@ defmodule Events.EventBrite do
   end
 
   defp convert(evt_map) do
+    description = evt_map["description"]["text"]
+      |> String.replace("\n", "\n\n")
     start_time = convert_datetime_map(evt_map["start"])
     end_time = convert_datetime_map(evt_map["end"])
 
@@ -49,7 +51,7 @@ defmodule Events.EventBrite do
       source: "eventbrite",
       source_id: evt_map["id"],
       name: evt_map["name"]["text"],
-      description: evt_map["description"]["text"],
+      description: description,
       url: evt_map["url"],
       venue: evt_map["venue"]["name"],
       start_time: start_time,
