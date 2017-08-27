@@ -33,7 +33,12 @@ config :events, Facebook,
     "asianpopupcinema",
     "faaimous",
     "chicagofilmfestival",
-    "ChicagoCulturalCenter"
+    "ChicagoCulturalCenter",
+    "WorldMusicFestivalChicago",
+    "auditoriumtheatre",
+    "ChicagoParkDistrict",
+    "chicagosymphony",
+    "oldtownschool",
   ]
 
   config :events, EventBrite,
