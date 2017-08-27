@@ -13,12 +13,16 @@ defmodule Events.Download do
       |> Poison.decode!
     else
       Logger.info "Downloading #{cache_name} from #{url}"
-      data = HTTPoison.get!(url, [], params: params)
-        |> (fn response -> response.body end).()
-        |> Poison.decode!
-
-      data |> Events.Util.to_json_file(path)
-      data
+      response = HTTPoison.get!(url, [], params: params)
+      # Only return the data if response code was 200.
+      if response.status_code == 200 do
+        data = response.body |> Poison.decode!
+        data |> Events.Util.to_json_file(path)
+        data
+      else
+        Logger.error "Got status code #{response.status_code} with response: #{response.body}"
+        nil
+      end
     end
   end
 
