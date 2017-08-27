@@ -13,7 +13,7 @@ defmodule Events.Facebook do
     page_names
       |> Task.async_stream(fn name -> fetch(name) end,
             ordered: false, max_concurrency: max_concurrency)
-      |> Enum.reduce([], fn({:ok, events}, acc) -> acc ++ events end)
+      |> Enum.flat_map(fn {:ok, events} -> events end)
       |> Enum.map(&convert/1)
       |> Enum.map(fn evt -> Events.Util.match_keywords(evt, @keywords) end)
   end

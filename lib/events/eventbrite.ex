@@ -11,12 +11,10 @@ defmodule Events.EventBrite do
     max_concurrency = System.schedulers_online() * 2
 
     @keywords
-      |> Enum.map(fn keyword -> fetch(keyword) end)
-      |> List.flatten
+      |> Task.async_stream(fn keyword -> fetch(keyword) end,
+            ordered: false, max_concurrency: max_concurrency)
+      |> Enum.flat_map(fn {:ok, events} -> events end)
       |> Enum.uniq_by(fn evt -> evt["id"] end)
-      # |> Task.async_stream(fn keyword -> fetch(keyword) end,
-      #       ordered: false, max_concurrency: max_concurrency)
-      # |> Enum.reduce([], fn({:ok, events}, acc) -> acc ++ events end)
       |> Enum.map(&convert/1)
       |> Enum.map(fn evt -> Events.Util.match_keywords(evt, @keywords) end)
   end
