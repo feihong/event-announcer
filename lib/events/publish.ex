@@ -19,10 +19,17 @@ defmodule Mix.Tasks.Events.Publish do
 
   defp publish(evt) do
     url = "https://api.meetup.com/#{@urlname}/events"
+    desc = "#{evt.description}\n\nSource: #{evt.url}"
+    full_desc = if evt.is_series do
+      "#{desc}\n\nNote: This event is part of a series. You may be able to attend it on other dates and times."
+    else
+      desc
+    end
+
     params = %{
       key: @api_key,
       name: evt.name,
-      description: "#{evt.description}\n\nSource: #{evt.url}",
+      description: full_desc,
       publish_status: "draft",
       time: evt.timestamp * 1000,
       duration: evt.duration * 1000,

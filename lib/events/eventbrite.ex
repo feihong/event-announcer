@@ -56,7 +56,8 @@ defmodule Events.EventBrite do
       venue: evt_map["venue"]["name"],
       start_time: start_time,
       timestamp: Timex.to_unix(start_time),
-      duration: Timex.diff(end_time, start_time, :seconds)
+      duration: Timex.diff(end_time, start_time, :seconds),
+      is_series: evt_map["is_series"]
     }
   end
 
