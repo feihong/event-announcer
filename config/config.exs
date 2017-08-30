@@ -39,6 +39,7 @@ config :events, Facebook,
     "ChicagoParkDistrict",
     "chicagosymphony",
     "oldtownschool",
+    "doc10filmfest",
   ]
 
   config :events, EventBrite,
