@@ -5,6 +5,9 @@ html
     title Fetched #{length(events)} events
     meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"
     link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous"
+    css:
+      .matched { color: gray; }
+      .source { font-style: italic; }
   body
     h1 Fetched #{length(events)} events (#{match_count} matched)
 
@@ -12,10 +15,8 @@ html
       thead
         tr
           th #
-          th Name
-          th Date
-          th Time
-          th Venue
+          th Name/Venue/Description
+          th Source/Date/Time
       tbody
         = for {evt, num} <- Enum.with_index(events, 1) do
           tr
@@ -23,9 +24,11 @@ html
             td
               a href="#{evt.url}" target="_blank" = evt.name
               = if length(evt.matched_keywords) > 0 do
-                div Matched: #{Enum.join(evt.matched_keywords, ", ")}
-              - else
-                span
-            td = Timex.format!(evt.start_time, "{WDshort}, {Mshort} {D}, {YYYY}")
-            td = Timex.format!(evt.start_time, "{h12}:{m} {am}")
-            td = evt.venue
+                div.matched Matched: #{Enum.join(evt.matched_keywords, ", ")}
+              div.venue #{evt.venue} | #{evt.address}
+              div.description = String.slice evt.description, 0..700
+            td
+              div.source #{evt.source}:#{evt.organization}
+              span = Timex.format!(evt.start_time, "{WDshort}, {Mshort} {D}, {YYYY}")
+              br
+              span = Timex.format!(evt.start_time, "{h12}:{m} {am}")
