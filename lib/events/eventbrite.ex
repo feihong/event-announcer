@@ -46,6 +46,8 @@ defmodule Events.EventBrite do
       |> String.replace("\n", "\n\n")
     start_time = convert_datetime_map(evt_map["start"])
     end_time = convert_datetime_map(evt_map["end"])
+    address = evt_map["venue"]["address"]["localized_multi_line_address_display"]
+      |> Enum.join(", ")
 
     %Events.Event{
       source: "eventbrite",
@@ -54,6 +56,7 @@ defmodule Events.EventBrite do
       description: description,
       url: evt_map["url"],
       venue: evt_map["venue"]["name"],
+      address: address,
       start_time: start_time,
       timestamp: Timex.to_unix(start_time),
       duration: Timex.diff(end_time, start_time, :seconds),

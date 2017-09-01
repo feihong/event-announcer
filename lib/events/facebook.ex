@@ -33,6 +33,10 @@ defmodule Events.Facebook do
     desc = evt_map["description"] |> String.replace(" \n", "\n")
     start_time = Timex.parse!(evt_map["start_time"], "{ISO:Extended}")
     end_time = Timex.parse!(evt_map["end_time"], "{ISO:Extended}")
+    location = evt_map["place"]["location"]
+    address = ["street", "city", "zip"]
+      |> Enum.map(fn key -> location[key] end)
+      |> Enum.join(", ")
 
     %Events.Event{
       source: "facebook",
@@ -41,6 +45,7 @@ defmodule Events.Facebook do
       description: desc,
       url: "https://facebook.com/events/#{evt_map["id"]}",
       venue: evt_map["place"]["name"],
+      address: address,
       start_time: start_time,
       timestamp: Timex.to_unix(start_time),
       duration: Timex.diff(end_time, start_time, :seconds)
