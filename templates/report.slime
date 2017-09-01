@@ -28,7 +28,10 @@ html
               div.venue #{evt.venue} | #{evt.address}
               div.description = String.slice evt.description, 0..700
             td
-              div.source #{evt.source}:#{evt.organization}
+              = if evt.organization != nil do
+                div.source #{evt.source}:#{evt.organization}
+              - else
+                div.source #{evt.source}
               span = Timex.format!(evt.start_time, "{WDshort}, {Mshort} {D}, {YYYY}")
               br
               span = Timex.format!(evt.start_time, "{h12}:{m} {am}")

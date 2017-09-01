@@ -51,6 +51,7 @@ defmodule Events.EventBrite do
 
     %Events.Event{
       source: "eventbrite",
+      organization: nil,    # todo
       source_id: evt_map["id"],
       name: evt_map["name"]["text"],
       description: description,

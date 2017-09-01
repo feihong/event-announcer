@@ -26,6 +26,7 @@ defmodule Events.Facebook do
                since: DateTime.utc_now |> DateTime.to_iso8601}
 
     Events.Download.fetch(cache_name, url, params)["data"]
+      |> Enum.map(fn m -> Map.put(m, "organization", name) end)
   end
 
   defp convert(evt_map) do
@@ -40,6 +41,7 @@ defmodule Events.Facebook do
 
     %Events.Event{
       source: "facebook",
+      organization: evt_map["organization"],
       source_id: evt_map["id"],
       name: evt_map["name"],
       description: desc,
