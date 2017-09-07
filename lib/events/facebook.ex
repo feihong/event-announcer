@@ -33,11 +33,21 @@ defmodule Events.Facebook do
     # Meetup description field HATES spaces before newlines.
     desc = evt_map["description"] |> String.replace(" \n", "\n")
     start_time = Timex.parse!(evt_map["start_time"], "{ISO:Extended}")
-    end_time = Timex.parse!(evt_map["end_time"], "{ISO:Extended}")
+    end_time =
+      case Timex.parse(evt_map["end_time"], "{ISO:Extended}") do
+        {:ok, val} -> val
+        {:error, _reason} -> nil
+      end
     location = evt_map["place"]["location"]
     address = ["street", "city", "zip"]
       |> Enum.map(fn key -> location[key] end)
       |> Enum.join(", ")
+    duration =
+      if end_time != nil do
+        Timex.diff(end_time, start_time, :seconds)
+      else
+        0
+      end
 
     %Events.Event{
       source: "facebook",
@@ -50,7 +60,7 @@ defmodule Events.Facebook do
       address: address,
       start_time: start_time,
       timestamp: Timex.to_unix(start_time),
-      duration: Timex.diff(end_time, start_time, :seconds)
+      duration: duration,
     }
   end
 end
