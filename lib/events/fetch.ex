@@ -12,6 +12,7 @@ defmodule Mix.Tasks.Events.Fetch do
       [Events.Facebook, Events.EventBrite]
       |> Enum.map(fn mod -> apply(mod, :fetch_all, []) end)
       |> List.flatten
+      |> Enum.filter(&in_near_future/1)
       |> Enum.filter(&not_read/1)
       |> Enum.sort_by(&sort_mapper/1)
 
@@ -32,6 +33,10 @@ defmodule Mix.Tasks.Events.Fetch do
     result = Events.ReadItem
       |> Events.Repo.get_by(source: evt.source, source_id: evt.source_id)
     result == nil
+  end
+
+  defp in_near_future(evt) do
+    Timex.diff(evt.start_time, Timex.today(), :months) < 6
   end
 
   defp sort_mapper(evt) do
