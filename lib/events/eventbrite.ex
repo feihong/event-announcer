@@ -3,6 +3,7 @@ defmodule Events.EventBrite do
   @base_url "https://www.eventbriteapi.com/v3"
   @access_token Application.fetch_env!(:events, EventBrite)[:access_token]
   @location Application.fetch_env!(:events, EventBrite)[:location]
+  @minute 60 * 1000
 
   @doc """
   Fetch EventBrite events as a list of Event structs.
@@ -11,8 +12,11 @@ defmodule Events.EventBrite do
     max_concurrency = System.schedulers_online() * 2
 
     @keywords
-      |> Task.async_stream(fn keyword -> fetch(keyword) end,
-            ordered: false, max_concurrency: max_concurrency)
+      |> Task.async_stream(
+          fn keyword -> fetch(keyword) end,
+          ordered: false,
+          max_concurrency: max_concurrency,
+          timeout: @minute)
       |> Enum.flat_map(fn {:ok, events} -> events end)
       |> Enum.uniq_by(fn evt -> evt["id"] end)
       |> Enum.map(&convert/1)
