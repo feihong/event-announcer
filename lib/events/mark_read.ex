@@ -27,11 +27,9 @@ defmodule Mix.Tasks.Events.MarkRead do
   end
 
   defp insert_read_item(evt) do
-    %Events.ReadItem{
-      source: evt.source,
-      source_id: evt.source_id,
-      name: evt.name,
-      start_time: evt.start_time
-    } |> Events.Repo.insert
+    evt
+    |> Map.from_struct
+    |> Events.ReadItem.changeset
+    |> Events.Repo.insert
   end
 end
