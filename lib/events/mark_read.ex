@@ -4,7 +4,7 @@ defmodule Mix.Tasks.Events.MarkRead do
   @shortdoc "Mark events in the report as read"
 
   def run(args) do
-    Application.ensure_all_started :timex_ecto
+    Application.ensure_all_started :timex
     Mix.Ecto.ensure_started Events.Repo, []
 
     if File.exists?("events.json") do

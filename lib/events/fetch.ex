@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Events.Fetch do
 
   def run(_args) do
     Application.ensure_all_started :httpoison
-    Application.ensure_all_started :timex_ecto
+    Application.ensure_all_started :timex
     Mix.Ecto.ensure_started Events.Repo, []
 
     events =

@@ -7,7 +7,7 @@ defmodule Events.ReadItem do
     field :source, :string
     field :source_id, :string
     field :name, :string
-    field :start_time, Ecto.DateTime
+    field :start_time, :utc_datetime
   end
 
   def changeset(model, params) do

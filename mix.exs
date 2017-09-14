@@ -22,13 +22,12 @@ defmodule Events.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto, "~> 2.1.0"},
+      {:ecto, "~> 2.2.3"},
       {:postgrex, "~> 0.13.3"},
       {:poison, "~> 3.1.0"},
       {:httpoison, "~> 0.13"},
       {:slime, "~> 1.0.0"},
       {:timex, "~> 3.1.24"},
-      {:timex_ecto, "~> 3.1.1"}
     ]
   end
 end
