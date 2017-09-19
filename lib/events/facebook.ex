@@ -31,7 +31,10 @@ defmodule Events.Facebook do
 
   defp convert(evt_map) do
     # Meetup description field HATES spaces before newlines.
-    desc = evt_map["description"] |> String.replace(" \n", "\n")
+    desc =
+      evt_map
+      |> Map.get("description", "")
+      |> String.replace(" \n", "\n")
     start_time = Timex.parse!(evt_map["start_time"], "{ISO:Extended}")
     end_time =
       case Timex.parse(evt_map["end_time"], "{ISO:Extended}") do
