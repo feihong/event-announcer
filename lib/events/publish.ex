@@ -7,6 +7,7 @@ defmodule Mix.Tasks.Events.Publish do
   @shortdoc "Publish events to a meetup group"
   @api_key Application.fetch_env!(:events, Meetup)[:api_key]
   @urlname Application.fetch_env!(:events, Meetup)[:urlname]
+  @series_text "Note: This event is part of a series. You may be able to attend it on other dates and times."
 
   def run(args) do
     Application.ensure_all_started :httpoison
@@ -22,12 +23,12 @@ defmodule Mix.Tasks.Events.Publish do
 
   defp publish(evt) do
     url = "https://api.meetup.com/#{@urlname}/events"
-    desc = "#{evt.description}\n\nSource: #{evt.url}"
-    full_desc = if evt.is_series do
-      "#{desc}\n\nNote: This event is part of a series. You may be able to attend it on other dates and times."
-    else
-      desc
-    end
+    desc = [
+      "Source: #{evt.url}",
+      (if evt.is_series, do: @series_text),
+      evt.description,
+    ] |> Enum.filter(fn s -> s != nil end)
+      |> Enum.join("\n\n")
 
     if String.length(evt.name) > 80 do
       Logger.warn "Event \"#{evt.name}\" has a name longer than 80 characters"
@@ -36,7 +37,7 @@ defmodule Mix.Tasks.Events.Publish do
     params = %{
       key: @api_key,
       name: String.slice(evt.name, 0..79),
-      description: full_desc,
+      description: desc,
       publish_status: "draft",
       time: evt.timestamp * 1000,
       duration: evt.duration * 1000,
