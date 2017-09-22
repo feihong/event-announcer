@@ -7,12 +7,14 @@ defmodule Events.Facebook do
   """
   def fetch_all() do
     page_names = Application.fetch_env!(:events, Facebook)[:pages]
-    max_concurrency = System.schedulers_online() * 2
+    max_concurrency = System.schedulers_online()
 
     # Fetch all events and sort.
     page_names
-      |> Task.async_stream(fn name -> fetch(name) end,
-            ordered: false, max_concurrency: max_concurrency)
+      |> Task.async_stream(
+          fn name -> fetch(name) end,
+          ordered: false,
+          max_concurrency: max_concurrency)
       |> Enum.flat_map(fn {:ok, events} -> events end)
       |> Enum.map(&convert/1)
       |> Enum.map(fn evt -> Events.Util.match_keywords(evt, @keywords) end)

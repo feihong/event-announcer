@@ -9,7 +9,7 @@ defmodule Events.EventBrite do
   Fetch EventBrite events as a list of Event structs.
   """
   def fetch_all() do
-    max_concurrency = System.schedulers_online() * 2
+    max_concurrency = System.schedulers_online()
 
     @keywords
       |> Task.async_stream(
