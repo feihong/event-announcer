@@ -28,6 +28,7 @@ defmodule Events.Mixfile do
       {:httpoison, "~> 0.13"},
       {:slime, "~> 1.0.0"},
       {:timex, "~> 3.1.24"},
+      {:floki, "~> 0.18.0"},
     ]
   end
 end

@@ -2,31 +2,34 @@ require Logger
 
 
 defmodule Events.Download do
-  @hour 60 * 60
+  @day 24 * 60 * 60     # one day in seconds
 
   def fetch_json(cache_name, url, params) do
     path = "cache/#{cache_name}.json"
 
-    result = fetch(path, url, params)
-    if result != nil do
-      data = result |> Poison.decode!
+    # Don't write the downloaded content to file, it will be handled in this
+    # function.
+    {state, result} = fetch(path, url, params, false)
+    data = result |> Poison.decode!
+    if state == :fresh do
       data |> Events.Util.to_json_file(path)
-      data
-    else
-      nil
     end
+    data
   end
 
-  def fetch(path, url, params) do
+  def fetch(path, url, params, writeFile \\ true) do
     if file_is_recent?(path) do
       Logger.info "Retrieving #{url} from cache"
-      File.read!(path)
+      {:cache, File.read!(path)}
     else
       Logger.info "Downloading #{url} to #{path}"
       response = HTTPoison.get!(url, [], params: params)
       # Only return the data if response code was 200.
       if response.status_code == 200 do
-        response.body
+        if writeFile do
+          File.write(path, response.body)
+        end
+        {:fresh, response.body}
       else
         Logger.error "Got status code #{response.status_code} with response: #{response.body}"
         nil
@@ -38,7 +41,7 @@ defmodule Events.Download do
   # 24 hours ago; false otherwise.
   defp file_is_recent?(path) do
     File.exists?(path) and
-      DateTime.diff(DateTime.utc_now(), file_ctime_datetime(path)) < (24 * @hour)
+      DateTime.diff(DateTime.utc_now(), file_ctime_datetime(path)) < @day
   end
 
   # Get the ctime of the given file as a DateTime
