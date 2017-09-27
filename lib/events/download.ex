@@ -7,18 +7,26 @@ defmodule Events.Download do
   def fetch_json(cache_name, url, params) do
     path = "cache/#{cache_name}.json"
 
-    if file_is_recent?(path) do
-      Logger.info "Retrieving #{cache_name} from cache"
-      File.read!(path)
-      |> Poison.decode!
+    result = fetch(path, url, params)
+    if result != nil do
+      data = result |> Poison.decode!
+      data |> Events.Util.to_json_file(path)
+      data
     else
-      Logger.info "Downloading #{cache_name} from #{url}"
+      nil
+    end
+  end
+
+  def fetch(path, url, params) do
+    if file_is_recent?(path) do
+      Logger.info "Retrieving #{url} from cache"
+      File.read!(path)
+    else
+      Logger.info "Downloading #{url} to #{path}"
       response = HTTPoison.get!(url, [], params: params)
       # Only return the data if response code was 200.
       if response.status_code == 200 do
-        data = response.body |> Poison.decode!
-        data |> Events.Util.to_json_file(path)
-        data
+        response.body
       else
         Logger.error "Got status code #{response.status_code} with response: #{response.body}"
         nil
