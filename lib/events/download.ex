@@ -17,6 +17,12 @@ defmodule Events.Download do
     data
   end
 
+  def fetch_page(cache_name, url, params) do
+    path = "cache/#{cache_name}.html"
+    {_, html} = fetch(path, url, params)
+    html
+  end
+
   def fetch(path, url, params, writeFile \\ true) do
     if file_is_recent?(path) do
       Logger.info "Retrieving #{url} from cache"
