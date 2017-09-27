@@ -59,7 +59,7 @@ defmodule Events.EventBrite do
       source_id: evt_map["id"],
       name: evt_map["name"]["text"],
       description: description,
-      url: evt_map["url"],
+      url: evt_map["url"] |> String.replace("?aff=ebapi", ""),
       venue: evt_map["venue"]["name"],
       address: address,
       start_time: start_time,
