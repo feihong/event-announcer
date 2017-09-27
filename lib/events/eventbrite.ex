@@ -5,6 +5,8 @@ defmodule Events.EventBrite do
   @location Application.fetch_env!(:events, EventBrite)[:location]
   @minute 60 * 1000
 
+  alias Events.Download
+
   @doc """
   Fetch EventBrite events as a list of Event structs.
   """
@@ -31,7 +33,7 @@ defmodule Events.EventBrite do
       sort_by: "date",
       "location.address": @location
     }
-    data = Events.Download.fetch("eventbrite__#{keyword}", url, params)
+    data = Download.fetch_json("eventbrite__#{keyword}", url, params)
     # pagination = data["pagination"]
     data["events"]
       |> Enum.map(&download_venue/1)
@@ -41,7 +43,7 @@ defmodule Events.EventBrite do
     venue_id = evt_map["venue_id"]
     url = "#{@base_url}/venues/#{venue_id}/"
     params = %{token: @access_token}
-    venue = Events.Download.fetch("eventbrite__venue__#{venue_id}", url, params)
+    venue = Download.fetch_json("eventbrite__venue__#{venue_id}", url, params)
     evt_map |> Map.put("venue", venue)
   end
 

@@ -4,7 +4,7 @@ require Logger
 defmodule Events.Download do
   @hour 60 * 60
 
-  def fetch(cache_name, url, params) do
+  def fetch_json(cache_name, url, params) do
     path = "cache/#{cache_name}.json"
 
     if file_is_recent?(path) do

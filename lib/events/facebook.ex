@@ -27,7 +27,7 @@ defmodule Events.Facebook do
     params = %{access_token: @access_token,
                since: DateTime.utc_now |> DateTime.to_iso8601}
 
-    Events.Download.fetch(cache_name, url, params)["data"]
+    Events.Download.fetch_json(cache_name, url, params)["data"]
       |> Enum.map(fn m -> Map.put(m, "organization", name) end)
   end
 
