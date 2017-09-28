@@ -11,13 +11,15 @@ defmodule Main do
 
     events =
       film_urls
-      |> Enum.map(&download_film_page/1)
+      |> Enum.map(fn url -> {url, download_film_page(url)} end)
       |> Enum.take(1)
       |> Enum.map(&convert/1)
 
     IO.puts "Found #{length(film_urls)} films"
 
-    IO.puts List.first(events)[:description]
+    evt = List.first(events)
+    IO.puts evt[:description]
+    IO.inspect evt[:screenings]
   end
 
   def download_film_page(url) do
@@ -26,7 +28,7 @@ defmodule Main do
     Download.fetch_page("chifilmfest__#{slug}", url, %{})
   end
 
-  def convert(html) do
+  defp convert({url, html}) do
     main = Floki.find(html, "section#main")
     title = main |> Floki.find("h1") |> Floki.text
     meta =
@@ -38,10 +40,25 @@ defmodule Main do
          end)
       |> Enum.join("\n")
 
-    synopsis = Floki.find(main, ".film-synopsis") |> Floki.text
+    synopsis =
+      Floki.find(main, ".film-synopsis p")
+      |> Enum.map(&Floki.text/1)
+      |> Enum.join("\n\n")
+
+    [{_tag, _attrs, children}] = Floki.find(main, ".film-screening-info")
+    screenings =
+      children
+      |> Enum.filter(&is_binary/1)
+
     %{
+      source: "chicagofilmfestival",
       name: title,
-      description: meta,
+      description: Enum.join([meta, synopsis], "\n\n"),
+      url: url,
+      venue: "AMC River East 21",
+      address: "",
+      screenings: screenings,
+      is_series: true,
     }
   end
 end
