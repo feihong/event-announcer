@@ -49,6 +49,8 @@ defmodule Main do
     screenings =
       children
       |> Enum.filter(&is_binary/1)
+      |> Enum.map(fn s ->
+          Timex.parse!(s, "{WDshort}, {Mshort} {D}, {YYYY} {h12}:{m} {AM}") end)
 
     %{
       source: "chicagofilmfestival",
