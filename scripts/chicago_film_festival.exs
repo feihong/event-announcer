@@ -19,6 +19,7 @@ defmodule Main do
 
     evt = List.first(events)
     IO.puts evt[:description]
+    IO.puts evt[:duration]
     IO.inspect evt[:screenings]
   end
 
@@ -38,6 +39,14 @@ defmodule Main do
           value = Floki.filter_out(li, "label") |> Floki.text |> String.trim
           {label, value}
          end)
+
+    duration =
+      meta
+      |> Enum.find(fn {label, _value} -> label == "Run Time" end)
+      |> elem(1)
+      |> String.trim_trailing(" minutes")
+      |> String.to_integer
+      |> (fn n -> n * 60 end).()
 
     meta_string =
       meta
@@ -63,8 +72,8 @@ defmodule Main do
       url: url,
       venue: "AMC River East 21",
       address: "322 E Illinois St, Chicago, IL 60611",
-      screenings: screenings,
-      is_series: true,
+      duration: duration,
+      screenings: screenings
     }
   end
 
