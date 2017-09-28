@@ -36,8 +36,12 @@ defmodule Main do
       |> Enum.map(fn li ->
           label = Floki.find(li, "label") |> Floki.text
           value = Floki.filter_out(li, "label") |> Floki.text |> String.trim
-          "#{label}: #{value}"
+          {label, value}
          end)
+
+    meta_string =
+      meta
+      |> Enum.map(fn {label, value} -> "#{label}: #{value}" end)
       |> Enum.join("\n")
 
     synopsis =
@@ -55,13 +59,18 @@ defmodule Main do
     %{
       source: "chicagofilmfestival",
       name: title,
-      description: Enum.join([meta, synopsis], "\n\n"),
+      description: Enum.join([meta_string, synopsis], "\n\n"),
       url: url,
       venue: "AMC River East 21",
-      address: "",
+      address: "322 E Illinois St, Chicago, IL 60611",
       screenings: screenings,
       is_series: true,
     }
+  end
+
+  # Turn one event into multiple
+  defp expand(event) do
+    []
   end
 end
 
