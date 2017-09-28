@@ -12,15 +12,16 @@ defmodule Main do
     events =
       film_urls
       |> Enum.map(fn url -> {url, download_film_page(url)} end)
-      |> Enum.take(1)
+      # |> Enum.take(1)
       |> Enum.map(&convert/1)
+      |> Enum.map(&expand/1)
+      |> Enum.concat
 
-    IO.puts "Found #{length(film_urls)} films"
+    IO.puts "Found #{length(film_urls)} films and #{length(events)} events\n"
 
     evt = List.first(events)
-    IO.puts evt[:description]
-    IO.puts evt[:duration]
-    IO.inspect evt[:screenings]
+    IO.puts evt.description
+    IO.puts evt.start_time
   end
 
   def download_film_page(url) do
@@ -30,6 +31,7 @@ defmodule Main do
   end
 
   defp convert({url, html}) do
+    IO.puts url
     main = Floki.find(html, "section#main")
     title = main |> Floki.find("h1") |> Floki.text
     meta =
@@ -65,21 +67,24 @@ defmodule Main do
       |> Enum.map(fn s ->
           Timex.parse!(s, "{WDshort}, {Mshort} {D}, {YYYY} {h12}:{m} {AM}") end)
 
-    %{
+    event = %Events.Event{
       source: "chicagofilmfestival",
       name: title,
-      description: Enum.join([meta_string, synopsis], "\n\n"),
+      description: Enum.join([synopsis, meta_string], "\n\n"),
       url: url,
       venue: "AMC River East 21",
       address: "322 E Illinois St, Chicago, IL 60611",
       duration: duration,
-      screenings: screenings
     }
+    {event, screenings}
   end
 
-  # Turn one event into multiple
-  defp expand(event) do
-    []
+  # Return an Event struct for each screening.
+  defp expand({event, screenings}) do
+    screenings
+    |> Enum.map(fn screening ->
+        %{event | start_time: screening,
+                  timestamp: Timex.to_unix(screening)} end)
   end
 end
 
