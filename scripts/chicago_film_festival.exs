@@ -1,6 +1,8 @@
 defmodule Main do
   alias Events.Download
 
+  @screening_format "{WDshort}, {Mshort} {D}, {YYYY} {h12}:{m} {AM}"
+
   def main() do
     url = "http://www.chicagofilmfestival.com/festival/film-event-listing/"
     html = Download.fetch_page("chifilmfest__index", url, %{})
@@ -34,6 +36,7 @@ defmodule Main do
     IO.puts url
     main = Floki.find(html, "section#main")
     title = main |> Floki.find("h1") |> Floki.text
+    # Get list of metadata tuples.
     meta =
       Floki.find(main, ".film-credits li")
       |> Enum.map(fn li ->
@@ -41,14 +44,6 @@ defmodule Main do
           value = Floki.filter_out(li, "label") |> Floki.text |> String.trim
           {label, value}
          end)
-
-    duration =
-      meta
-      |> Enum.find(fn {label, _value} -> label == "Run Time" end)
-      |> elem(1)
-      |> String.trim_trailing(" minutes")
-      |> String.to_integer
-      |> (fn n -> n * 60 end).()
 
     meta_string =
       meta
@@ -60,13 +55,6 @@ defmodule Main do
       |> Enum.map(&Floki.text/1)
       |> Enum.join("\n\n")
 
-    [{_tag, _attrs, children}] = Floki.find(main, ".film-screening-info")
-    screenings =
-      children
-      |> Enum.filter(&is_binary/1)
-      |> Enum.map(fn s ->
-          Timex.parse!(s, "{WDshort}, {Mshort} {D}, {YYYY} {h12}:{m} {AM}") end)
-
     event = %Events.Event{
       source: "chicagofilmfestival",
       name: title,
@@ -74,9 +62,51 @@ defmodule Main do
       url: url,
       venue: "AMC River East 21",
       address: "322 E Illinois St, Chicago, IL 60611",
-      duration: duration,
+      duration: get_duration(meta),
     }
-    {event, screenings}
+    {event, get_screenings(main)}
+  end
+
+  defp get_screenings(main) do
+    [{_tag, _attrs, children}] = Floki.find(main, ".film-screening-info")
+    screening_lines =
+      children
+      |> Enum.filter(&is_binary/1)
+      |> Enum.filter(fn s ->
+          Regex.match? ~r/^Mon|Tue|Wed|Thu|Fri|Sat|Sun/, s end)
+
+    screenings =
+      screening_lines
+      |> Enum.map(fn s ->
+          case Timex.parse(s, @screening_format) do
+            {:ok, dt} -> dt
+            _ -> nil
+          end
+        end)
+      |> Enum.filter(fn v -> v != nil end)
+
+    screenings
+  end
+
+  defp get_duration(meta) do
+    run_time =
+      meta
+      |> Enum.find(fn {label, _value} -> label == "Run Time" end)
+      |> (fn result ->
+            case result do
+              {_label, value} -> value
+              _ -> nil
+            end
+          end).()
+
+    if run_time == nil do
+      0
+    else
+      run_time
+      |> String.trim_trailing(" minutes")
+      |> String.to_integer
+      |> (fn n -> n * 60 end).()
+    end
   end
 
   # Return an Event struct for each screening.
