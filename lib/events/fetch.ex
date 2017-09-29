@@ -9,7 +9,7 @@ defmodule Mix.Tasks.Events.Fetch do
     Mix.Ecto.ensure_started Events.Repo, []
 
     events =
-      [Events.Facebook, Events.EventBrite]
+      [Events.Facebook, Events.EventBrite, Events.Adhoc]
       |> Enum.map(fn mod -> apply(mod, :fetch_all, []) end)
       |> List.flatten
       |> Enum.filter(&in_near_future/1)

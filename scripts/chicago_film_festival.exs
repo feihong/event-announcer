@@ -21,9 +21,9 @@ defmodule Main do
 
     IO.puts "Found #{length(film_urls)} films and #{length(events)} events\n"
 
-    evt = List.first(events)
-    IO.puts evt.description
-    IO.puts evt.start_time
+    events |> Events.Util.to_json_file("adhoc_events.json")
+
+    IO.puts "Generated adhoc_events.json"
   end
 
   def download_film_page(url) do
