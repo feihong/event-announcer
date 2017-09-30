@@ -112,9 +112,12 @@ defmodule Main do
   # Return an Event struct for each screening.
   defp expand({event, screenings}) do
     screenings
-    |> Enum.map(fn screening ->
+    |> Enum.map(
+      fn screening ->
         %{event | start_time: screening,
-                  timestamp: Timex.to_unix(screening)} end)
+                  timestamp: Timex.to_unix(screening),
+                  is_series: length(screenings) > 1}
+      end)
   end
 end
 
