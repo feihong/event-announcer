@@ -50,8 +50,8 @@ defmodule Events.Meetup do
       name: String.slice(evt.name, 0..79),
       description: desc,
       publish_status: "draft",
-      time: evt.timestamp * 1000,
-      duration: evt.duration * 1000,
+      time: shift_timestamp(evt) * 1000,
+      duration: round_duration(evt.duration) * 1000,
       event_hosts: "",
       self_rsvp: "false"
     ]
@@ -86,6 +86,22 @@ defmodule Events.Meetup do
       :doesnotexist
     else
       List.first(matches)["id"]
+    end
+  end
+
+  defp shift_timestamp(evt) do
+    # When venue is specified, then you have to use UTC.
+    evt.start_time
+    |> Timex.shift(hours: +5)
+    |> Timex.to_unix
+  end
+
+  defp round_duration(n) do
+    # Round duration up to closest 15 minutes (900 seconds).
+    if rem(n, 900) == 0 do
+      n
+    else
+      round_duration(n + 1)
     end
   end
 end
