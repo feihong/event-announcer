@@ -8,7 +8,8 @@ defmodule Events.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
-      Events.Repo
+      Events.Repo,
+      Events.Meetup,
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
