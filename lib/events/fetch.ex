@@ -36,7 +36,7 @@ defmodule Mix.Tasks.Events.Fetch do
   end
 
   defp in_near_future(evt) do
-    Timex.diff(evt.start_time, Timex.today(), :months) < 6
+    Timex.diff(evt.start_time, Timex.today(), :months) <= 4
   end
 
   defp sort_mapper(evt) do
