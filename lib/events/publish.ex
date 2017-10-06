@@ -7,6 +7,7 @@ defmodule Mix.Tasks.Events.Publish do
 
   def run(args) do
     Application.ensure_all_started :httpoison
+    Application.ensure_all_started :timex
     Events.Meetup.start_link([])
 
     indexes = args |> Enum.map(&String.to_integer/1)

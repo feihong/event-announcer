@@ -50,7 +50,7 @@ defmodule Events.Meetup do
       name: String.slice(evt.name, 0..79),
       description: desc,
       publish_status: "draft",
-      time: shift_timestamp(evt) * 1000,
+      time: shift_timestamp(evt, venue_id) * 1000,
       duration: round_duration(evt.duration) * 1000,
       event_hosts: "",
       self_rsvp: "false"
@@ -72,7 +72,7 @@ defmodule Events.Meetup do
   end
 
   defp find_venue({name, address}) do
-    IO.puts "Find venue matching #{name} and #{address}"
+    IO.puts "Find venue matching #{name} with address #{address}"
     url = "https://api.meetup.com/find/venues"
     params = [key: @api_key, text: name, location: address]
     matches =
@@ -89,11 +89,15 @@ defmodule Events.Meetup do
     end
   end
 
-  defp shift_timestamp(evt) do
+  defp shift_timestamp(evt, venue_id) do
     # When venue is specified, then you have to use UTC.
-    evt.start_time
-    |> Timex.shift(hours: +5)
-    |> Timex.to_unix
+    if venue_id == :doesnotexist do
+      evt.start_time |> Timex.to_unix
+    else
+      evt.start_time
+      |> Timex.shift(hours: +5)
+      |> Timex.to_unix
+    end
   end
 
   defp round_duration(n) do
