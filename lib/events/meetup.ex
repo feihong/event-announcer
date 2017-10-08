@@ -5,6 +5,7 @@ defmodule Events.Meetup do
   @api_key Application.fetch_env!(:events, Meetup)[:api_key]
   @urlname Application.fetch_env!(:events, Meetup)[:urlname]
   @series_text "Note: This event is part of a series. You may be able to attend it on other dates and times."
+  @twelve_hours 12 * 3600
 
   use GenServer
 
@@ -27,7 +28,11 @@ defmodule Events.Meetup do
     {venue_id, new_venue_map} = get_venue_id(evt, venue_map)
 
     url = "https://api.meetup.com/#{@urlname}/events"
-    res = HTTPoison.post!(url, [], [], params: get_params(evt, venue_id))
+    params =
+      get_params(evt)
+      |> add_venue_id(venue_id)
+      |> add_time(evt.start_time)
+    res = HTTPoison.post!(url, [], [], params: params)
     if res.status_code == 201 do
       IO.puts "Posted #{evt.name} at #{evt.venue}"
     else
@@ -36,7 +41,7 @@ defmodule Events.Meetup do
     {:reply, :ok, new_venue_map}
   end
 
-  defp get_params(evt, venue_id) do
+  defp get_params(evt) do
     desc = [
       "Source: #{evt.url}",
       (if evt.is_series, do: @series_text),
@@ -45,20 +50,15 @@ defmodule Events.Meetup do
     |> Enum.filter(&(&1 != nil))
     |> Enum.join("\n\n")
 
-    params = [
+    [
       key: @api_key,
       name: String.slice(evt.name, 0..79),
       description: desc,
       publish_status: "draft",
-      time: shift_timestamp(evt, venue_id) * 1000,
-      duration: round_duration(evt.duration) * 1000,
       event_hosts: "",
       self_rsvp: "false"
     ]
-    case venue_id do
-      :doesnotexist -> params
-      val -> [{:venue_id, val} | params]
-    end
+    |> add_duration(evt.duration)
   end
 
   defp get_venue_id(evt, venue_map) do
@@ -89,14 +89,34 @@ defmodule Events.Meetup do
     end
   end
 
-  defp shift_timestamp(evt, venue_id) do
-    # When venue is specified, then you have to use UTC.
-    if venue_id == :doesnotexist do
-      evt.start_time |> Timex.to_unix
+  defp add_time(params, start_time) do
+    # When venue_id is specified, then you have to use UTC.
+    timestamp =
+      if params[:venue_id] == nil do
+        start_time |> Timex.to_unix
+      else
+        start_time |> Timex.shift(hours: +5) |> Timex.to_unix
+      end
+
+    # Convert to milliseconds.
+    params ++ [time: timestamp * 1000]
+  end
+
+  defp add_duration(params, duration) do
+    # If duration is excessively long, it's most likely a multi-day event, so
+    # leave it out.
+    if duration > @twelve_hours do
+      params
     else
-      evt.start_time
-      |> Timex.shift(hours: +5)
-      |> Timex.to_unix
+      # Multipy by 100 to get duration in milliseconds.
+      params ++ [duration: round_duration(duration) * 1000]
+    end
+  end
+
+  defp add_venue_id(params, venue_id) do
+    case venue_id do
+      :doesnotexist -> params
+      val -> params ++ [venue_id: val]
     end
   end
 
