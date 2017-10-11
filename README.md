@@ -16,5 +16,6 @@ mix ecto.migrate
 
 ## References
 
-[Ecto - Getting Started](https://hexdocs.pm/ecto/getting-started.html)
-[Timex Formatting Directives](https://hexdocs.pm/timex/Timex.Format.DateTime.Formatters.Default.html#module-list-of-all-directives)
+- [Ecto - Getting Started](https://hexdocs.pm/ecto/getting-started.html)
+- [Timex Formatting Directives](https://hexdocs.pm/timex/Timex.Format.DateTime.Formatters.Default.html#module-list-of-all-directives)
+- [EventBrite API Docs](https://www.eventbrite.com/developer/v3/)

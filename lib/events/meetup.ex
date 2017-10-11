@@ -90,14 +90,12 @@ defmodule Events.Meetup do
   end
 
   defp add_time(params, start_time) do
-    # When venue_id is specified, then you have to use UTC.
-    timestamp =
-      if params[:venue_id] == nil do
-        start_time |> Timex.to_unix
-      else
-        start_time |> Timex.shift(hours: +5) |> Timex.to_unix
-      end
-
+    # if params[:venue_id] == nil do
+    #   start_time |> Timex.to_unix
+    # else
+    #   start_time |> Timex.shift(hours: +5) |> Timex.to_unix
+    # end
+    timestamp = start_time |> Timex.to_unix
     # Convert to milliseconds.
     params ++ [time: timestamp * 1000]
   end
