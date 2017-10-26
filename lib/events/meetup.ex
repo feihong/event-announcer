@@ -2,13 +2,16 @@ require Logger
 
 
 defmodule Events.Meetup do
+  use GenServer
+
   @api_key Application.fetch_env!(:events, Meetup)[:api_key]
   @urlname Application.fetch_env!(:events, Meetup)[:urlname]
   @series_text "Note: This event is part of a series. You may be able to attend it on other dates and times."
-  @twelve_hours 12 * 3600
+  @max_duration 12 * 3600   # 12 hours
 
-  use GenServer
-
+  @doc """
+  Publish the given event to Meetup.com.
+  """
   def publish(evt) do
     GenServer.call(__MODULE__, evt)
   end
@@ -17,9 +20,6 @@ defmodule Events.Meetup do
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
-  @doc """
-  Publish the given event to Meetup.com.
-  """
   def handle_call(evt, _from, venue_map) do
     if String.length(evt.name) > 80 do
       Logger.warn "Event \"#{evt.name}\" has a name longer than 80 characters"
@@ -32,13 +32,19 @@ defmodule Events.Meetup do
       get_params(evt)
       |> add_venue_id(venue_id)
       |> add_time(evt.start_time)
-    res = HTTPoison.post!(url, [], [], params: params)
-    if res.status_code == 201 do
-      IO.puts "Posted #{evt.name} at #{evt.venue}"
-    else
-      Logger.error "Status code #{res.status_code}, response: #{res.body}"
+
+    result = HTTPoison.post(url, [], [], params: params)
+    case result do
+        {:ok, res} ->
+          if res.status_code == 201 do
+            Logger.info "Posted #{evt.name} at #{evt.venue}"
+          else
+            Logger.error "Status code #{res.status_code}, response: #{res.body}"
+          end
+        {:error, reason} ->
+            Logger.error "Error: #{reason}"
     end
-    {:reply, :ok, new_venue_map}
+    {:reply, result, new_venue_map}
   end
 
   defp get_params(evt) do
@@ -72,7 +78,6 @@ defmodule Events.Meetup do
   end
 
   defp find_venue({name, address}) do
-    IO.puts "Find venue matching #{name} with address #{address}"
     url = "https://api.meetup.com/find/venues"
     params = [key: @api_key, text: name, location: address]
     matches =
@@ -85,16 +90,12 @@ defmodule Events.Meetup do
     if length(matches) == 0 do
       :doesnotexist
     else
+      IO.puts "Found venue for #{name} at #{address}"
       List.first(matches)["id"]
     end
   end
 
   defp add_time(params, start_time) do
-    # if params[:venue_id] == nil do
-    #   start_time |> Timex.to_unix
-    # else
-    #   start_time |> Timex.shift(hours: +5) |> Timex.to_unix
-    # end
     timestamp = start_time |> Timex.to_unix
     # Convert to milliseconds.
     params ++ [time: timestamp * 1000]
@@ -103,7 +104,7 @@ defmodule Events.Meetup do
   defp add_duration(params, duration) do
     # If duration is excessively long, it's most likely a multi-day event, so
     # leave it out.
-    if duration > @twelve_hours do
+    if duration > @max_duration do
       params
     else
       # Multipy by 100 to get duration in milliseconds.

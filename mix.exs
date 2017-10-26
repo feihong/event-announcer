@@ -29,6 +29,7 @@ defmodule Events.Mixfile do
       {:slime, "~> 1.0.0"},
       {:timex, "~> 3.1.24"},
       {:floki, "~> 0.18.0"},
+      {:ok, "~> 1.9.2"},
     ]
   end
 end
