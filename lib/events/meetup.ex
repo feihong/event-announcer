@@ -82,7 +82,7 @@ defmodule Events.Meetup do
     params = [key: @api_key, text: name, location: address]
     matches =
       HTTPoison.get!(url, [], params: params)
-      |> (fn response -> response.body end).()
+      |> Map.fetch!(:body)
       |> Poison.decode!
       |> Enum.filter(&(&1["name"] == name))
       |> Enum.sort_by(&(&1["rating_count"]), &>=/2)
@@ -102,9 +102,9 @@ defmodule Events.Meetup do
   end
 
   defp add_duration(params, duration) do
-    # If duration is excessively long, it's most likely a multi-day event, so
-    # leave it out.
-    if duration > @max_duration do
+    # If duration is excessively long, it's most likely a multi-day event. If
+    # duration is zero, then it's likely unknown. In either case, leave it out.
+    if duration > @max_duration or duration == 0 do
       params
     else
       # Multipy by 100 to get duration in milliseconds.

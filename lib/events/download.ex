@@ -29,16 +29,18 @@ defmodule Events.Download do
       {:cache, File.read!(path)}
     else
       Logger.info "Downloading #{url} to #{path}"
-      response = HTTPoison.get!(url, [], params: params)
-      # Only return the data if response code was 200.
-      if response.status_code == 200 do
-        if writeFile do
-          File.write(path, response.body)
-        end
-        {:fresh, response.body}
-      else
-        Logger.error "Got status code #{response.status_code} with response: #{response.body}"
-        nil
+      case HTTPoison.get(url, [], params: params) do
+        {:ok, response} ->
+          # Only return the data if response code was 200.
+          if response.status_code == 200 do
+            if writeFile, do: File.write(path, response.body)
+            {:fresh, response.body}
+          else
+            Logger.error "Got status code #{response.status_code} with response: #{response.body}"
+            {:error, [status: response.status_code, url: url]}
+          end
+        {:error, _reason} = result ->
+          result
       end
     end
   end

@@ -3,7 +3,7 @@ defmodule Events.Adhoc do
   @keywords Application.fetch_env!(:events, :keywords)
 
   @doc """
-  Read adhoc events from a JSON file.
+  Fetch adhoc events from adhoc_events.json file.
   """
   def fetch_all() do
     if File.exists?(@events_file) do
