@@ -68,12 +68,16 @@ defmodule Events.Meetup do
   end
 
   defp get_venue_id(evt, venue_map) do
-    key = {evt.venue, evt.address}
-    case Map.fetch(venue_map, key) do
-      {:ok, val} -> {val, venue_map}
-      _ ->
-        result = find_venue(key)
-        {result, Map.put(venue_map, key, result)}
+    if evt.venue == nil do
+      {:doesnotexist, venue_map}
+    else
+      key = {evt.venue, evt.address}
+      case Map.fetch(venue_map, key) do
+        {:ok, val} -> {val, venue_map}
+        _ ->
+          result = find_venue(key)
+          {result, venue_map |> Map.put(key, result)}
+      end
     end
   end
 
