@@ -6,10 +6,13 @@ defmodule Events.Application do
   use Application
 
   def start(_type, _args) do
+    import Supervisor.Spec
+
     # List all child processes to be supervised
     children = [
       Events.Repo,
-      Events.Meetup,
+      worker(Events.Meetup, []),
+      worker(Events.Fetcher, []),
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
