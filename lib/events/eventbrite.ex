@@ -48,8 +48,13 @@ defmodule Events.EventBrite do
   end
 
   defp convert(evt_map) do
-    description = evt_map["description"]["text"]
-      |> String.replace("\n", "\n\n")
+    # It's possible for description text to be nil.
+    description =
+      try do
+        evt_map["description"]["text"] |> String.replace("\n", "\n\n")
+      rescue
+        ArgumentError -> ""
+      end
     start_time = convert_datetime_map(evt_map["start"])
     end_time = convert_datetime_map(evt_map["end"])
     address = evt_map["venue"]["address"]["localized_multi_line_address_display"]
