@@ -2,7 +2,7 @@ require Logger
 
 
 defmodule Events.Download do
-  @day 24 * 60 * 60     # one day in seconds
+  @expire_duration 6 * 60 * 60     # in seconds
 
   def fetch_json(cache_name, url, params) do
     path = "cache/#{cache_name}.json"
@@ -46,10 +46,10 @@ defmodule Events.Download do
   end
 
   # Returns true if the file at the given path exists and was created less than
-  # 24 hours ago; false otherwise.
+  # @expire_duration ago; false otherwise.
   defp file_is_recent?(path) do
     File.exists?(path) and
-      DateTime.diff(DateTime.utc_now(), file_ctime_datetime(path)) < @day
+      DateTime.diff(DateTime.utc_now(), file_ctime_datetime(path)) < @expire_duration
   end
 
   # Get the ctime of the given file as a DateTime

@@ -7,7 +7,6 @@ System for event discovery and announcement
 [Make sure you have Elixir installed.](https://github.com/feihong/elixir-examples#installation)
 
 ```
-cd events
 mix deps.get
 mix ecto.drop
 mix ecto.create
