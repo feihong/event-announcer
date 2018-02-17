@@ -4,11 +4,13 @@ require Logger
 defmodule Events.Fetcher do
   use GenServer
 
+  @minute 60 * 1000
+
   @doc """
   Fetch all events.
   """
   def fetch() do
-    GenServer.call(__MODULE__, :fetch)
+    GenServer.call(__MODULE__, :fetch, @minute)
   end
 
   def start_link() do
